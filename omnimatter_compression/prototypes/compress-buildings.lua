@@ -237,7 +237,7 @@ local process_fluid_box = function(fluid_box, i, is_graded)
     fluid_box.filter = fl_name
   end
   if fluid_box.base_area then
-    fluid_box.base_area = fluid_box.base_area * math.pow(multiplier, i) / sluid_contain_fluid
+    fluid_box.base_area = ((sluid_contain_fluid^2) / 50) * fluid_box.base_area * math.pow(multiplier, i)
   end
   for I=1, #fluid_box do
     if fluid_box[I] then
@@ -254,7 +254,7 @@ local process_fluid_box = function(fluid_box, i, is_graded)
         fluid_box[I].filter = fl_name
       end
       if fluid_box[I].base_area then
-        fluid_box[I].base_area = fluid_box[I].base_area * math.pow(multiplier, i) / sluid_contain_fluid
+        fluid_box[I].base_area = ((sluid_contain_fluid^2) / 50) * fluid_box[I].base_area * math.pow(multiplier, i)
       end
     end
   end
@@ -400,9 +400,10 @@ local run_entity_updates = function(new, kind, i)
     end
     new.crafting_categories = new_cat
     new.crafting_speed = new.crafting_speed * math.pow(multiplier,i)
+    --[[ If we decide to do this at some point
     if new.fluid_boxes then
-      --process_fluid_box(new.fluid_boxes, i, false)
-    end
+      process_fluid_box(new.fluid_boxes, i, false)
+    end]]
   end
   --lab vial slot update (may want to move this to recipe update since tools/items are done later...)
   if kind == "lab" then
