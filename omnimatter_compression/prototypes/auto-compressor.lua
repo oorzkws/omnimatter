@@ -3,7 +3,7 @@ local mini = settings.startup["omnicompression_1x1_buildings"].value
 local function minify(a_value, b_value)
 	return mini and a_value or b_value
 end
-local fluidbox = minify({
+local fluidbox = {
 	{
 		pipe_covers = pipecoverspictures(),
 		base_area = 120,
@@ -13,7 +13,7 @@ local fluidbox = minify({
 			type = "input",
 			position = {
 				0,
-				-1
+				minify(-1, -1.9)
 			}
 		}}
 	},
@@ -26,11 +26,11 @@ local fluidbox = minify({
 			type = "output",
 			position = {
 				0,
-				1
+				minify(1, 1.9)
 			}
 		}}
 	}
-}, "XWX.XXX.XKX")
+}
 local b = BuildGen:create("omnimatter_compression","auto-compressor"):
 	setStacksize(50):
 	setFlags({"placeable-neutral", "placeable-player", "player-creation"}):
