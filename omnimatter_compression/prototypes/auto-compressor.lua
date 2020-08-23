@@ -6,9 +6,9 @@ end
 local fluidbox = {
 	{
 		pipe_covers = pipecoverspictures(),
-		base_area = 120,
+		base_area = (sluid_contain_fluid^2)/50,
 		production_type = "input",
-		base_level = -1,
+		base_level = -999,
 		pipe_connections = {{
 			type = "input",
 			position = {
@@ -19,9 +19,9 @@ local fluidbox = {
 	},
 	{
 		pipe_covers = pipecoverspictures(),
-		base_area = 120,
+		base_area = (sluid_contain_fluid^2)/50,
 		production_type = "output",
-		base_level = 1,
+		base_level = 999,
 		pipe_connections = {{
 			type = "output",
 			position = {
