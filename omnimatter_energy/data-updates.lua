@@ -190,8 +190,10 @@ else
 		omni.lib.add_prerequisite("angels-metallurgy-1", "basic-omnium-power")
 	end	
 end
-	  
-RecGen:import("basic-circuit-board"):setEnabled(false):setTechName("anbaricity"):extend()
+
+if data.raw.recipe["basic-circuit-board"] then
+	omni.lib.add_unlock_recipe("anbaricity", "basic-circuit-board")
+end
 
 --Check if the vanilla lab is locked behind a tech /disabled. If yes, modify the tech
 if data.raw.recipe["lab"].enabled == false then
