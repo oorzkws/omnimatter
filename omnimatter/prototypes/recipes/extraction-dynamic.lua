@@ -114,8 +114,8 @@ local get_omnimatter_split = function(tier,focus,level)
     local aligned_ores = {}
     local source_count = table_size(source)
     for a, i in pairs(source) do
-        -- Build a contiguous array of our ores
-        aligned_ores[#aligned_ores + 1] = i.name
+        -- Build a table of our ore names
+        aligned_ores[i.name] = true
     end
     -- If very little ores per tier, break out early
     if source_count < (focus and 1 or 2) then
@@ -150,32 +150,32 @@ local get_omnimatter_split = function(tier,focus,level)
             splits[#splits + 1] = math.floor(quotient)
         end
     end
-
     local ores = {}
     -- Add the proper number of products to our extraction recipe
     for _, rec_index in pairs(splits) do
         local split_ores = {}
-        local total_quantity = level
-        local i = 0
-        -- Loop until we've caught the required amount of ores *and* our focus if applicable
-        repeat
-            i = i + 1
-            local index = aligned_ores[i] == focus and i or #aligned_ores
-            if (index == i) or (#split_ores < rec_index - 1) then 
+        local total_quantity = level + (focus and 1 or 0)
+        if focus and aligned_ores[focus] then
+            split_ores[#split_ores + 1] = {
+                name = focus,
+                amount = 1,
+                type = "item"
+            }
+            aligned_ores[focus] = nil
+        end
+        for current in pairs(aligned_ores) do
+            if rec_index > #split_ores then 
                 total_quantity = total_quantity + 1
                 split_ores[#split_ores + 1] = {
-                    name = aligned_ores[index],
+                    name = current,
                     amount = 1,
                     type = "item"
                 }
-                if index == i then
-                    table.remove(aligned_ores, i)
-                    i = i - 1
-                else
-                    aligned_ores[index] = nil
-                end
+                aligned_ores[current] = nil
+            else
+                break
             end
-        until (#split_ores == rec_index) or (i == #aligned_ores)
+        end
         -- Adjust by total count + level
         for I = 1, #split_ores do
             local ore = split_ores[I]
@@ -304,7 +304,6 @@ for i, tier in pairs(omnisource) do
     end
 end
 
-
 --Impure recipies
 for _,ore_tiers in pairs(omnisource) do
     --Base mix
@@ -315,9 +314,30 @@ for _,ore_tiers in pairs(omnisource) do
         if t == 1 then
             tc = tc * omni.beginning_tech_help
         end
+        local result_names = " "
+        local icons = omni.icon.of("omnite", "item")
+        icons[1].tint = {1,1,1,0.8}-- Just a canvas but we want the right size
+        local item_count = #split-1
+        for I=1, item_count do
+            result_names = result_names .. "[img=item." .. split[I].name .. "]/"
+            local deg = (I / item_count * 360)+90 -- Offset a bit
+            deg = math.rad(deg % 360)
+            icons = util.combine_icons(
+                icons,
+                omni.icon.of(split[I].name, "item"),
+                {
+                    scale = 0.5,
+                    shift = {
+                        math.cos(deg) * icons[1].icon_size * 0.33,
+                        math.sin(deg) * icons[1].icon_size * 0.33
+                    }
+                }
+            )
+        end
+        result_names = result_names:sub(1, -2)
         local base_impure_ore = (
             RecGen:create("omnimatter", "omnirec-base-" .. i .. "-extraction-" .. t):
-            setLocName("base-impure", {t}):
+            setLocName("recipe-name.base-impure", {"", result_names}):
             setIngredients(
                 {name = "omnite", type = "item", amount = 10}
             ):
@@ -326,13 +346,13 @@ for _,ore_tiers in pairs(omnisource) do
             setTechUpgrade(t > 1):
             setTechCost(tc):
             setEnabled(false):
-            setTechPacks(math.max(1, t - 1)):setTechIcon("omnimatter", "omnimatter"):setIcons("omnite"):addIcon(
+            setTechPacks(math.max(1, t - 1)):setTechIcon("omnimatter", "omnimatter"):setIcons(icons)--[[:addIcon(
                 {
                     icon = "__omnilib__/graphics/icons/small/num_" .. i .. ".png",
                     scale = 0.4375,
                     shift = {-10, -10}
                 }
-            )
+            )]]
         )
         if t == 1 then
             base_impure_ore:setCategory("omnite-extraction-both"):
@@ -356,7 +376,7 @@ for _,ore_tiers in pairs(omnisource) do
                 local focused_ore =
                 (
                     RecGen:create("omnimatter", "omnirec-focus-" .. j .. "-" .. ore.name .. "-" .. ord[i]):
-                    setLocName("impure-omnitraction", {"item-name." .. ore.name}):
+                    setLocName("recipe-name.impure-omnitraction", {"item-name." .. ore.name}):
                     setIngredients({name = "omnite", type = "item", amount = 10}):
                     setSubgroup("omni-impure"):
                     setEnergy(5 * (math.floor(t / 2 + 0.5))):
