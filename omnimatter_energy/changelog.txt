@@ -1,6 +1,9 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.2
-Date: 2020.08.xx
+Date: 2020.08.31
+  Features:
+    - Added heretical scripts to allow Pyanodons to work with this... even without the AB patch mod
+      Confirmed to work up to green science... be warned, burner phase lasts a log while
   Changes:
     - Renamed technology "basic-omnium-power" to "omnitech-basic-omnium-power"
     - Renamed technology "anbaricity" to "omnitech-anbaricity"
