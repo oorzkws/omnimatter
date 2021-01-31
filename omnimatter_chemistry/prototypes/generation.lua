@@ -1,7 +1,5 @@
 
 
-local ord={"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r"}
-
 local science_pack = {"science-pack-1","science-pack-2","omni-pack","science-pack-3","production-science-pack","high-tech-science-pack"}
 
 added_techs={}
@@ -59,7 +57,7 @@ function omni.chem.add_chem(name, recipe, tech)
 				end
 			end
 		end
-		if mods["omnimatter_marathon"] then omni.marathon.exclude_recipe(name.."-"..ord[i]) end
+		if mods["omnimatter_marathon"] then omni.marathon.exclude_recipe(name.."-"..omni.lib.alpha(i)) end
 		local loc_name = ""
 		if recipe.loc_name then
 			loc_name={"recipe-name.omni-recipe",recipe.loc_name}
@@ -68,7 +66,7 @@ function omni.chem.add_chem(name, recipe, tech)
 		end
 		reg[#reg+1]={
 			type = "recipe",
-			name = "omnirec-"..name.."-"..ord[i],
+			name = "omnirec-"..name.."-"..omni.lib.alpha(i),
 			icon_size = 32,
 			enabled = false,
 			localised_name=loc_name,
@@ -117,7 +115,7 @@ function omni.chem.add_chem(name, recipe, tech)
 			order = "z",
 			effects = {
 				{type = "unlock-recipe",
-				recipe="omnirec-"..name.."-"..ord[i]},
+				recipe="omnirec-"..name.."-"..omni.lib.alpha(i)},
 			},
 			upgrade = i>1,
 			prerequisites = r,
@@ -129,7 +127,7 @@ function omni.chem.add_chem(name, recipe, tech)
 			}
 			}
 		else
-			omni.lib.add_unlock_recipe("omnitech-"..tech.."-"..i,"omnirec-"..name.."-"..ord[i])
+			omni.lib.add_unlock_recipe("omnitech-"..tech.."-"..i,"omnirec-"..name.."-"..omni.lib.alpha(i))
 		end
 		
 	end
