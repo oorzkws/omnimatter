@@ -42,77 +42,13 @@ local function tech_cost(levels,grade,tier)
     return omni.lib.round(20*math.pow(omni.pure_tech_tier_increase,tier)*get_tier_mult(levels,grade,1))
 end
 
-local impure_icons =function(t,kind)
-    local icons = {}
-    if kind then
-        
-        icons[#icons+1] = {icon = kind.icon}
-        icons[#icons+1] = {icon = "__omnimatter__/graphics/icons/specialized-impure-extraction.png"}
-        --icons[#icons+1] = {icon = "__omnimatter__/graphics/icons/extraction-"..t..".png"}
-    else
-        icons[#icons+1] = {icon = "__omnimatter__/graphics/icons/omnite.png"}
-        icons[#icons+1] = {icon = "__omnimatter__/graphics/icons/extraction-"..t..".png"}
-    end
-    return icons
-end
-
-local get_impurities = function(ore,tier)
-    local tierores = {}
-    for _,o in pairs(omni.matter.omnisource) do
-        if o.tier == tier and o.ore.name ~= ore then
-            tierores[#tierores+1]=o.ore.name
-        end
-    end
-    local pickedores = {ore}
-    local c = math.random(12)
-    if ore then
-        c = string.byte(ore, math.random(string.len(ore))) % 12
-    end
-    math.randomseed(
-        c + omni.impure_levels_per_tier * omni.impure_dependency - omni.pure_levels_per_tier + tier * #tierores
-    )
-    while #tierores > 0 and #pickedores < 4 do
-        local pick = math.random(1, #tierores)
-        pickedores[#pickedores + 1] = tierores[pick]
-        table.remove(tierores, pick)
-        --log("in loop tier count: " .. #tierores)
-    end
-    return pickedores
-end
-local proper_result = function(tier, level,focus)
-    local res = {}
-    local impurities = get_impurities(focus,tier)
-    if #impurities ~=1 then
-        if level == 0 then
-            local avg = 2
-            for _,imp in pairs(impurities) do
-                local p = avg/#impurities 
-                res[#res+1] = {type = "item", name = imp, amount_min = avg-1, amount_max = avg+1, probability = p}
-            end
-        else
-            local count = #impurities+level
-            local avg = level +2
-            res[#res+1] = {type = "item", name = focus, amount_min = avg-1, amount_max = avg+1, probability = (level+1)/count*4/avg}
-            for _,imp in pairs(impurities) do
-                if imp ~= focus then
-                    res[#res+1] = {type = "item", name = imp, amount_min = level, amount_max = level+2, probability = 4/(count*(level+1))}
-                end
-            end
-        end
-    else
-        local p = (2+2*level/omni.impure_levels_per_tier)/4
-        res[#res+1] = {type = "item", name = impurities[1], amount_min = 3, amount_max = 5, probability = p}
-    end
-    res[#res+1]={type = "item", name = "stone-crushed", amount=6}
-    return res
-end
 
 local get_omnimatter_split = function(tier,focus,level)
     local source = table.deepcopy(omni.matter.omnisource[tostring(tier)])
     level = level or 0
     local aligned_ores = {}
     local source_count = table_size(source)
-    for a, i in pairs(source) do
+    for _, i in pairs(source) do
         -- Build a table of our ore names
         aligned_ores[i.name] = true
     end
@@ -245,7 +181,7 @@ end
 
 --Pure extraction
 for i, tier in pairs(omni.matter.omnisource) do
-    for ore_name, ore in pairs(tier) do
+    for _, ore in pairs(tier) do
         --Check for hidden flag to skip later
         
         local item = ore.name
@@ -275,39 +211,37 @@ for i, tier in pairs(omni.matter.omnisource) do
             end
             return desc
         end
-
-        local pure_ore = (
-            RecChain:create("omnimatter", "extraction-" .. item):
-            setLocName("recipe-name.pure-omnitraction", {"item-name." .. item}):
-            setLocDesc(function(levels, grade) return get_desc(levels,grade) end):
-            setIngredients("omnite"):
-            setIcons(item):
-            setIngredients(cost:ingredients()):
-            setResults(cost:results()):
-            setEnabled(false):
-            setCategory("omnite-extraction"):
-            setSubgroup("omni-pure"):
-            setMain(item):
-            setLevel(3 * omni.pure_levels_per_tier):
-            setEnergy(
-                function(levels, grade)
-                    return 5 * (math.floor((grade - 1 + (tier_int - 1) / 2) / levels) + 1)
-                end):
-            setTechIcons(generate_pure_icon(ore)):
-            setTechCost(
-                function(levels, grade)
-                    return tech_cost(levels, grade, tier_int)
-                end):
-            setTechPrereq(
-                function(levels, grade)
-                    return reqpure(tier_int, grade, item)
-                end):
-            setTechPacks(
-                function(levels, grade)
-                    return math.floor((grade - 1) * 3 / levels) + tier_int
-                end):
-            setTechLocName("omnitech-pure-omnitraction", {"item-name." .. item}):extend()
-        )
+        
+        RecChain:create("omnimatter", "extraction-" .. item):
+        setLocName("recipe-name.pure-omnitraction", {"item-name." .. item}):
+        setLocDesc(function(levels, grade) return get_desc(levels,grade) end):
+        setIngredients("omnite"):
+        setIcons(item):
+        setIngredients(cost:ingredients()):
+        setResults(cost:results()):
+        setEnabled(false):
+        setCategory("omnite-extraction"):
+        setSubgroup("omni-pure"):
+        setMain(item):
+        setLevel(3 * omni.pure_levels_per_tier):
+        setEnergy(
+            function(levels, grade)
+                return 5 * (math.floor((grade - 1 + (tier_int - 1) / 2) / levels) + 1)
+            end):
+        setTechIcons(generate_pure_icon(ore)):
+        setTechCost(
+            function(levels, grade)
+                return tech_cost(levels, grade, tier_int)
+            end):
+        setTechPrereq(
+            function(_, grade)
+                return reqpure(tier_int, grade, item)
+            end):
+        setTechPacks(
+            function(levels, grade)
+                return math.floor((grade - 1) * 3 / levels) + tier_int
+            end):
+        setTechLocName("omnitech-pure-omnitraction", {"item-name." .. item}):extend()
     end
 end
 
@@ -392,9 +326,9 @@ for _,ore_tiers in pairs(omni.matter.omnisource) do
         for i, sp in pairs(level_splits) do
             for j, r in pairs(sp) do
                 local desc = ""
-                for j, part in pairs(r) do
+                for jj, part in pairs(r) do
                     desc = desc.."[img=item."..part.name.."] x "..string.format("%.2f",part.amount * (part.probability or 1))
-                    if j<#r then desc = desc.."\n" end
+                    if jj <#r then desc = desc.."\n" end
                 end
                 local focused_ore =
                 (
